@@ -90,7 +90,7 @@ export const WORKOUTS = {
     name: 'Lower B', focus: 'Hinge focus — hamstrings, glutes, quads + abs', zone: 'lower', mins: 45,
     // Stable two-foot moves: the home bench wobbles and single-leg balance work isn't the goal.
     main: [
-      { ex: 'db_squat', sets: 3, reps: [10, 12] },
+      { ex: 'rev_lunge', sets: 3, reps: [8, 10] },
       { ex: 'db_rdl', sets: 3, reps: [8, 10] },
       { ex: 'step_up', sets: 3, reps: [8, 10] },
       { ex: 'reverse_crunch', sets: 3, reps: [10, 15] },
