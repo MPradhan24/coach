@@ -62,14 +62,14 @@ export const EXERCISES = {
   },
   band_pulldown: {
     name: 'Band Lat Pulldown', group: 'Back', muscles: 'Lats',
-    img: 'Wide-Grip_Lat_Pulldown', type: 'band', rest: 60, bands: ['Medium band', 'Hard band'],
+    img: 'Wide-Grip_Lat_Pulldown', type: 'band', rest: 60, bands: ['Medium band', 'Hard band', 'Medium + Hard band'],
     imgNote: 'Photo shows a cable machine. Do the same thing with a band looped over your pull-up bar, kneeling underneath.',
     cues: ['Loop band over pull-up bar, kneel below it', 'Pull hands down to shoulders, elbows to your ribs', 'Chest up, don\'t lean back much', 'Control the band on the way up'],
     swaps: ['pullup_assist', 'db_row'],
   },
   face_pull: {
     name: 'Band Face Pull', group: 'Shoulders', muscles: 'Rear delts · upper back · posture',
-    img: 'Face_Pull', type: 'band', rest: 45, bands: ['Medium band', 'Hard band'],
+    img: 'Face_Pull', type: 'band', rest: 45, bands: ['Medium band', 'Hard band', 'Medium + Hard band'],
     imgNote: 'Photo shows a cable. Anchor the band at face height (pull-up bar or door) and do the same.',
     cues: ['Pull band toward your forehead, hands split apart', 'Elbows high, finish like a "double bicep" pose', 'Fixes rounded shoulders from desk work'],
     swaps: ['reverse_fly', 'band_pull_apart'],
@@ -116,7 +116,7 @@ export const EXERCISES = {
   },
   band_pushdown: {
     name: 'Band Triceps Pushdown', group: 'Arms', muscles: 'Triceps',
-    img: 'Triceps_Pushdown_-_Rope_Attachment', type: 'band', rest: 45, bands: ['Medium band', 'Hard band'],
+    img: 'Triceps_Pushdown_-_Rope_Attachment', type: 'band', rest: 45, bands: ['Medium band', 'Hard band', 'Medium + Hard band'],
     imgNote: 'Photo shows a cable rope. Loop your band over the pull-up bar and push down the same way.',
     cues: ['Elbows pinned to your sides', 'Push down until arms are straight, spread hands at bottom', 'Slow on the way up'],
     swaps: ['oh_tri'],
@@ -183,7 +183,7 @@ export const EXERCISES = {
   step_up: {
     name: 'Dumbbell Step-Up', group: 'Legs', muscles: 'Quads · glutes',
     img: 'Dumbbell_Step_Ups', type: 'weight', start: 6, rest: 75, perSide: true,
-    cues: ['Whole foot on bench', 'Drive through that heel — don\'t push off the back foot', 'Control the step down'],
+    cues: ['Push the bench against a wall first. Still wobbles? Swap to reverse lunge', 'Whole foot on bench', 'Drive through that heel — don\'t push off the back foot', 'Control the step down'],
     swaps: ['rev_lunge'],
   },
   glute_bridge: {
@@ -236,7 +236,7 @@ export const EXERCISES = {
     name: 'Reverse Crunch', group: 'Core', muscles: 'Lower abs',
     img: 'Reverse_Crunch', type: 'bw', rest: 45,
     cues: ['Knees bent, roll hips off the mat toward chest', 'Slow down — no momentum'],
-    swaps: ['hanging_knee'],
+    swaps: ['dead_bug', 'hanging_knee'],
   },
   russian_twist: {
     name: 'Russian Twist', group: 'Core', muscles: 'Obliques',

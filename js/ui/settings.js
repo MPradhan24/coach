@@ -1,8 +1,7 @@
 import { getState, update, replaceState, resetState } from '../lib/store.js';
 import { EXERCISES } from '../data/exercises.js';
-import { WORKOUTS } from '../data/program.js';
 import { targets, weeklyAverages, ACTIVITY, currentWeight } from '../lib/targets.js';
-import { programWeek, programDay, finishedWorkouts } from '../lib/schedule.js';
+import { programWeek, programDay, finished, finishedWorkouts } from '../lib/schedule.js';
 import { streakInfo } from '../lib/streaks.js';
 import { history, describeSets } from '../lib/progression.js';
 import { today, addDays, DAY_NAMES, esc, round } from '../lib/util.js';
@@ -127,16 +126,18 @@ function coachSummary(s) {
     '', 'Weekly average weight:', ...weeklyAverages(s).map((w) => `  wk ${w.week}: ${round(w.kg, 0.1)} kg`),
     s.waist.length ? `Waist: ${s.waist.map((w) => `${w.date} ${w.cm}cm`).join(', ')}` : 'Waist: not logged',
     '', 'Lifts (first → latest):',
-    ...[...new Set(Object.values(WORKOUTS).flatMap((w) => w.main.map((m) => m.ex)))].map((id) => {
+    // Every exercise ever logged, so swapped-in moves show up too.
+    ...[...new Set(finished(s).flatMap((x) => Object.keys(x.sets || {})))].filter((id) => EXERCISES[id]).map((id) => {
       const h = history(s, id);
       return h.length ? `  ${EXERCISES[id].name}: ${describeSets(EXERCISES[id], h.at(-1).sets)} → ${describeSets(EXERCISES[id], h[0].sets)} (${h.length} sessions)` : null;
     }).filter(Boolean),
   ];
-  const last14 = Array.from({ length: 14 }, (_, i) => addDays(t, -i));
-  const habitDays = last14.map((d) => s.habits[d] || {});
-  lines.push('', 'Habits, last 14 days (days hit):', ...['protein', 'water', 'steps', 'sleep', 'nosugar'].map((h) => `  ${h}: ${habitDays.filter((x) => x[h]).length}/14`));
-  const proteinDays = last14.map((d) => s.foodLog[d]).filter(Boolean).length;
-  lines.push(`Food logged on ${proteinDays}/14 days.`);
+  const span = Math.max(1, Math.min(14, programDay(p)));
+  const lastDays = Array.from({ length: span }, (_, i) => addDays(t, -i));
+  const habitDays = lastDays.map((d) => s.habits[d] || {});
+  lines.push('', `Habits, last ${span} days (days hit):`, ...['protein', 'water', 'steps', 'sleep', 'nosugar'].map((h) => `  ${h}: ${habitDays.filter((x) => x[h]).length}/${span}`));
+  const proteinDays = lastDays.map((d) => s.foodLog[d]).filter(Boolean).length;
+  lines.push(`Food logged on ${proteinDays}/${span} days.`);
   if (s.cravings.length) lines.push(`Cravings: ${s.cravings.length} total, beat ${s.cravings.filter((c) => c.outcome === 'beat').length}, swapped ${s.cravings.filter((c) => c.outcome === 'swap').length}.`);
   const ci = s.checkins.slice(-3);
   if (ci.length) lines.push('', 'Recent check-ins (energy/hunger/sleep 1-5):', ...ci.map((c) => `  ${c.date}: E${c.energy} H${c.hunger} S${c.sleep}${c.note ? ` · "${c.note}"` : ''}`));

@@ -73,6 +73,10 @@ export function suggest(state, exId, rx, { recharge = false, setCount } = {}) {
     note = allTop ? 'Top of the range. Slow the tempo or try the harder swap.' : 'Beat last time by 1 rep per set.';
   }
 
+  // Reps climbing every set (e.g. 12, 14, 16) means the early sets were far from hard.
+  const rising = prev && !recharge && prev.sets.length > 1 && prev.sets.every((x, i) => i === 0 || x.r > prev.sets[i - 1].r);
+  if (rising) note += ' Last time your reps went up every set, so set 1 was too easy. Push set 1 close to your limit too.';
+
   return { sets: Array.from({ length: n }, (_, i) => ({ w, b, r: reps(i) })), note, last: lastText };
 }
 
