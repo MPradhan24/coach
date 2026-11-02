@@ -1,10 +1,10 @@
 import { getState, update } from '../lib/store.js';
 import { WORKOUTS, ACTIVE_REST_OPTIONS } from '../data/program.js';
 import { quoteFor, tipFor } from '../data/quotes.js';
-import { dayKind, nextWorkoutType, sessionsOn, programDay, programWeek, programTotalDays, isRechargeWeek, weekDates } from '../lib/schedule.js';
+import { dayKind, weekKinds, nextWorkoutType, sessionsOn, programDay, programWeek, programTotalDays, isRechargeWeek, weekDates } from '../lib/schedule.js';
 import { streakInfo, dayStatus, weekScore } from '../lib/streaks.js';
 import { targets, trendAdvice } from '../lib/targets.js';
-import { today, fmtDate, esc, uid, DAY_NAMES, dow, mondayOf, parseDate } from '../lib/util.js';
+import { today, fmtDate, esc, uid, DAY_NAMES, dow, mondayOf, parseDate, addDays } from '../lib/util.js';
 import { check, bar, openSheet, closeSheet, toast } from './common.js';
 import { foodTotals } from './food.js';
 import { startWorkout } from './workout.js';
@@ -63,7 +63,7 @@ export function render() {
   <div class="card"><p class="quote">${esc(quoteFor(t))}</p></div>
 
   <div class="section-title">This week · ${ws.done}/${ws.goal} workouts</div>
-  <div class="card">${weekStrip(s)}</div>
+  <div class="card">${weekStrip(s)}<button class="link mt-s" data-act="plan-week">Change days this week</button></div>
 
   <div class="section-title">Daily habits · ${Object.values(habitsToday).filter(Boolean).length}/5</div>
   <div class="card">${HABITS(tg).map((h) => check('habit', habitsToday[h.id], h.label, h.sub, `data-id="${h.id}"`)).join('')}</div>
@@ -166,7 +166,49 @@ function checkinAdvice(c) {
   return out;
 }
 
+const KIND_SYM = { train: '💪', active: '🚶', rest: '😴' };
+const KIND_NEXT = { train: 'active', active: 'rest', rest: 'train' };
+
+// Rearrange this week and next (travel, busy days). Past days are locked.
+function weekSheet() {
+  const s = getState(), t = today(), mon = mondayOf(t);
+  const block = (m, title) => {
+    const kinds = weekKinds(s.profile, m);
+    const lifts = kinds.filter((k) => k === 'train').length;
+    return `<div class="section-title">${title} · ${lifts} lifting day${lifts === 1 ? '' : 's'}</div>
+      <div class="week">${kinds.map((k, i) => {
+        const d = addDays(m, i), past = d < t;
+        return `<div><div class="d">${DAY_NAMES[(i + 1) % 7]}<br>${+d.slice(8)}</div>
+          <button type="button" class="dot ${k === 'rest' ? 'rest' : ''}" style="background:none;padding:0;min-height:0;min-width:0;color:inherit;${past ? 'opacity:.4' : ''}" data-act="wk-cycle" data-mon="${m}" data-i="${i}" ${past ? 'disabled' : ''} aria-label="${DAY_NAMES[(i + 1) % 7]} ${k}">${KIND_SYM[k]}</button></div>`;
+      }).join('')}</div>`;
+  };
+  openSheet('Change your days', `<p class="muted">Tap a day to switch it: 💪 lift → 🚶 walk → 😴 rest. Aim for 4 lifting days a week. Travelling? Make those days 😴 and move the lifts to other days. Rest days never break your streak.</p>
+    ${block(mon, 'This week')}${block(addDays(mon, 7), 'Next week')}
+    <button class="btn btn-ghost btn-block mt" data-act="wk-reset">Back to my usual days</button>`);
+}
+
 export const actions = {
+  'plan-week'() { weekSheet(); return false; },
+  'wk-cycle'(el) {
+    const { mon } = el.dataset, i = +el.dataset.i;
+    update((s) => {
+      const p = s.profile;
+      p.weekPlans ||= {};
+      const kinds = weekKinds(p, mon);
+      kinds[i] = KIND_NEXT[kinds[i]];
+      p.weekPlans[mon] = kinds;
+    });
+    weekSheet();
+  },
+  'wk-reset'() {
+    // Only this week and later; weeks that are over keep how they were scheduled.
+    update((s) => {
+      const mon = mondayOf(today()), plans = s.profile.weekPlans || {};
+      for (const m of Object.keys(plans)) if (m >= mon) delete plans[m];
+    });
+    closeSheet();
+    toast('Back to your usual days');
+  },
   start(el) { startWorkout(el.dataset.type, !!el.dataset.mini); return false; },
   'go-workout'() { location.hash = '#/workout'; return false; },
   'discard-workout'() { if (confirm('Discard the workout in progress?')) update((s) => { s.active = null; }); },

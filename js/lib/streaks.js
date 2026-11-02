@@ -43,7 +43,7 @@ function bestStreak(state) {
 export function weekScore(state, date = today()) {
   const days = weekDates(date);
   const done = finishedWorkouts(state).filter((s) => days.includes(s.date)).length;
-  return { done, goal: state.profile.trainDays.length };
+  return { done, goal: days.filter((d) => dayKind(state.profile, d) === 'train').length };
 }
 
 export const activeDays = (state) => new Set(state.sessions.filter((s) => s.finishedAt).map((s) => s.date)).size;

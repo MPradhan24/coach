@@ -2,12 +2,17 @@ import { ROTATION, WORKOUTS, RECHARGE_WEEK, PROGRAM_WEEKS } from '../data/progra
 import { today, addDays, diffDays, dow, mondayOf } from './util.js';
 
 // train = lifting day · active = walk/skip day · rest = full rest
+// A week can be rearranged: profile.weekPlans[monday] = 7 kinds, Monday first.
 export function dayKind(profile, date) {
+  const custom = profile.weekPlans?.[mondayOf(date)];
+  if (custom) return custom[(dow(date) + 6) % 7];
   const d = dow(date);
   if (profile.trainDays.includes(d)) return 'train';
   if (d === profile.restDay) return 'rest';
   return 'active';
 }
+
+export const weekKinds = (profile, monday) => Array.from({ length: 7 }, (_, i) => dayKind(profile, addDays(monday, i)));
 
 export const finished = (state) => state.sessions.filter((s) => s.finishedAt);
 export const finishedWorkouts = (state) => finished(state).filter((s) => WORKOUTS[s.type]);
